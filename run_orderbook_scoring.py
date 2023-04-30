@@ -20,30 +20,28 @@ def get_mm_score_for_snap_slot(df):
             best_ask = best_bid
 
     mark_price = (best_bid+best_ask)/2
+    mbps = {'A': 0.0001, 'B': 0.0005, 'C': 0.001, 'D': 0.002, 'E': 0.005, 'F': 0.01}
 
-    mbps = .0005 # 5 bps
-    mbpsA = mbps/5
-    mbpsB = mbps*3/5
 
-    within_bps_of_price = (mark_price * mbps)
+    # within_bps_of_price = (mark_price * mbps)
 
     # if market_index == 1 or market_index == 2:
     #     within_bps_of_price = (mark_price * .00025)
 
     def rounded_threshold(x, direction):
-        within_bps_of_price = (mark_price * mbps)
+        mbps_values = list(mbps.values())
+        within_bps_of_price = .0005 #default
         if direction == 'long':
-            if x >= best_bid*(1-mbpsA):
-                within_bps_of_price = (mark_price * mbpsA)
-            elif x >= best_bid*(1-mbpsB):
-                within_bps_of_price = (mark_price * mbpsB)
+            for i in range(len(mbps_values)):
+                if x >= best_bid*(1-mbps_values[i]):
+                    within_bps_of_price = mark_price * mbps_values[i]
+                    break
             res = np.floor(float(x)/within_bps_of_price) * within_bps_of_price
         else:
-            if x <= best_ask*(1+mbpsA):
-                within_bps_of_price = (mark_price * mbpsA)
-            elif x <= best_ask*(1+mbpsB):
-                within_bps_of_price = (mark_price * mbpsB)
-
+            for i in range(len(mbps_values)):
+                if x <= best_ask*(1+mbps_values[i]):
+                    within_bps_of_price = mark_price * mbps_values[i]
+                    break
             res = np.ceil(float(x)/within_bps_of_price) * within_bps_of_price
 
         return res
@@ -64,7 +62,8 @@ def get_mm_score_for_snap_slot(df):
     score_scale = tts.min(axis=1)/q * 100
     # target bps of for scoring [1,3,5,10,15,20]
 
-    score_scale = score_scale * pd.Series([2, .75, .5, .4, .3, .2]) #, .09, .08, .07])
+    score_scale = score_scale * pd.Series([4, 2, .75, .4, .3, .2]) #, .09, .08, .07])
+
     chars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     for i,x in enumerate(top6bids.index[:6]):
         char = chars[i]
@@ -84,7 +83,7 @@ def get_mm_score_for_snap_slot(df):
 approx_one_month_lookback = -3500
 approx_two_week_lookback = -1700
 
-market_indexes = [0,1,2,3,4,5,6,7]
+market_indexes = [0,1,2,3,4,5,6,7,8]
 for mi in market_indexes:
     tt = 'perp'+str(mi)
     ggs = glob('drift-v2-orderbook-snap/'+tt+'/*.csv')
