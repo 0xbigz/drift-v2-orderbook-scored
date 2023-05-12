@@ -83,7 +83,7 @@ def get_mm_score_for_snap_slot(df):
 approx_one_month_lookback = -3500
 approx_two_week_lookback = -1700
 
-market_indexes = [0,1,2,3,4,5,6,7,8]
+market_indexes = [0,1,2,3,4,5,6,7,8,9,10]
 for mi in market_indexes:
     tt = 'perp'+str(mi)
     ggs = glob('drift-v2-orderbook-snap/'+tt+'/*.csv')
